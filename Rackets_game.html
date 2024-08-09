@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rackets Game</title>
+    <style>
+        html,body,#playfield{
+           margin: 0;
+           height: 100%;
+           background-color: #0d0d0d; 
+           overflow: hidden;
+        }
+        #ball{
+            background-color: green;
+            width: 20px;
+            height: 20px;
+            border-radius: 20px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+        }
+        #player-1, #player-2{
+            background-color: #3452eb;
+            width: 15px;
+            height: 100px;
+            position: absolute;
+            top:45%
+        }
+        #player-1{
+            right: 0;
+        }
+        #player-2{
+            left: 0;
+        }
+        #game-over-card{
+            width: 300px;
+            height: 130px;
+            background-color: #fff;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            position: absolute;
+            right: 0;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+        #start-game-button{
+            cursor: pointer;
+            background-color: #0330fc;
+            color: #fff;
+            border-radius: 5px;
+            border: 0;
+            padding: 10px;
+        }
+        .middle-line{
+            border: 1px solid #fff;
+            height: 100%;
+            position: absolute;
+            left: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="playfield">
+        <div class="middle-line"></div>
+        <div id="ball"></div>
+        <div id="player-1"></div>
+        <div id="player-2"></div>
+
+        <div id="game-over-card">
+            <h1 id="game-score"> 0 / 0 </h1>
+            <button id="start-game-button" onclick="startGame()">Play</button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    let moveBallInterval = null
+    let player1Score = 0;
+    let player2Score = 0;
+
+    function moveRackets(){
+        const payersSpeed = 20;
+        document.addEventListener('keydown',(event)=>{
+            const playfieldHight =  document.getElementById("playfield")
+            .getBoundingClientRect().height;
+
+            const player1 = document.getElementById("player-1");
+            const plater1Top = player1.getBoundingClientRect().top;
+
+            const player2 = document.getElementById("player-2");
+            const plater2Top = player2.getBoundingClientRect().top
+
+            if(event.key === 'ArrowDown' && (plater1Top + 100) < playfieldHight){
+                player1.style.top = plater1Top + payersSpeed  + 'px'
+            }else if(event.key === 'ArrowUp' && plater1Top > 0){
+                player1.style.top = plater1Top - payersSpeed  + 'px'
+            }
+            else if(event.key === 's' && (plater2Top + 100) < playfieldHight){
+                player2.style.top = plater2Top + payersSpeed  + 'px'
+            }else if(event.key === 'w' && plater2Top > 0){
+                player2.style.top = plater2Top - payersSpeed  + 'px'
+            }
+
+        })
+    }
+    moveRackets();
+
+    function moveBall(){
+        const ballSpeed = 25;
+        let X = 1;
+        let Y = 1;
+        const ball = document.getElementById("ball");
+       
+        moveBallInterval = setInterval(()=>{
+            const plater1Top = document.getElementById("player-1").getBoundingClientRect().top;
+            const plater2Top = document.getElementById("player-2").getBoundingClientRect().top;
+
+            const { height, width} =  document.getElementById("playfield").getBoundingClientRect();
+
+            const { left, top } = ball.getBoundingClientRect();
+            const isPayer1InTheRightY =  top > plater1Top && top < (plater1Top + 100)
+            const isPayer2InTheRightY =  top > plater2Top && top < (plater2Top + 100)
+            if(( ((left + 20) > width) && isPayer1InTheRightY) || (left < 0 && isPayer2InTheRightY)){ X = X * -1 }
+            if((top + 20) > height || top < 0){ Y = Y * -1 }
+
+            ball.style.left = left + (X * ballSpeed) + 'px';
+            ball.style.top = top + (Y * (ballSpeed + 5)) + 'px';
+
+
+            if(left > width){
+                // player 2 won
+                player2Score++;
+                stopGame();
+            }
+
+            if(left < -20){
+                // player 1 won
+                player1Score++;
+                stopGame();
+            }
+
+        },100)
+
+    } 
+
+    function stopGame(){
+        clearInterval(moveBallInterval);
+        document.getElementById('game-score').textContent = player2Score + ' / ' + player1Score;
+        document.getElementById('game-over-card').style.display = 'block'
+        document.getElementById('ball').style.left = '50%'
+        document.getElementById('ball').style.top = '50%'
+    }
+
+    function startGame(){
+        document.getElementById('game-over-card').style.display = 'none'
+        moveBall();
+    }
+</script>
