@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        html, body, #play-field{
+            margin: 0;
+            height: 100%;
+            background-color: #0d0d0d;
+            overflow: hidden;
+        }
+        #snake-food-div{
+            width: 10px;
+            height: 10px;
+            background-color: green;
+            position: absolute;
+        }
+        .snake-body{
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            position: absolute;
+        }
+        #Game-Over-Card{
+            position: absolute;
+            left: 45%;
+            top: 45%;
+            background-color: #fff;
+            text-align: center;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .Start-Over-Button{
+            background-color: #0330fc;
+            color: #fff;
+            border-radius: 5px;
+            border: 0;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="play-field"></div>
+    <div id="Game-Over-Card">
+        <h1>Game Over</h1>
+        <button class="Start-Over-Button" onclick="startGame()">Start Over</button>
+    </div>
+</body>
+</html>
+
+<script>
+    let moveSnakeInterval = null;
+    const snakeSpeed = 10;
+    let snakeDirection = 'right';
+    let snakeBody = [];
+
+    function controleSnakeMove(){
+        document.addEventListener("keydown",(event)=>{
+            if(event.key === 'ArrowDown' && snakeDirection != 'up'){
+                snakeDirection = "down";
+            }else if(event.key === 'ArrowUp' && snakeDirection != 'down'){
+                snakeDirection = "up";
+            }else if(event.key === 'ArrowRight' && snakeDirection != 'left'){
+                snakeDirection = "right";
+            }else if(event.key === 'ArrowLeft' && snakeDirection != 'right'){
+                snakeDirection = "left";
+            }
+            console.log('==keydown==',event.key)
+        })
+    }
+    controleSnakeMove();
+
+    function gameOver(){
+        clearInterval(moveSnakeInterval)
+        document.getElementById("Game-Over-Card").style.display = "block"
+    }
+
+    function startGame() {
+        snakeBody = [{left:0,top:0},{left:0,top:0}];
+        document.getElementById("Game-Over-Card").style.display = "none"
+        moveSnake();
+        snakeFood();
+    }
+
+    startGame();
+
+    function moveSnake(){
+        let playField = document.getElementById("play-field")
+        let snakeHead = snakeBody[0]
+        moveSnakeInterval = setInterval(()=>{
+            const {height, width} = playField.getBoundingClientRect();
+            
+            for(let i = snakeBody.length-1; 0 < i; i--){
+                snakeBody[i] = {...snakeBody[i-1]}
+            }
+            
+            
+
+            // remove old snake body
+            document.querySelectorAll(".snake-body").forEach((elem)=>{
+                elem.remove();
+            })
+
+            
+            // next snake move
+            if(snakeDirection === 'right'){ snakeHead.left += snakeSpeed }
+            if(snakeDirection === 'left'){ snakeHead.left -= snakeSpeed }
+            if(snakeDirection === 'down'){ snakeHead.top += snakeSpeed }
+            if(snakeDirection === 'up'){ snakeHead.top -= snakeSpeed }
+            
+            if(snakeHead.left > width){ snakeHead.left = 0}
+            if(snakeHead.top > height){ snakeHead.top = 0}
+            if(snakeHead.left < 0){ snakeHead.left = Math.round(width/10) * 10; }
+            if(snakeHead.top < 0 ){ snakeHead.top = Math.round(height/10) * 10;}
+            
+            //wrong next snake move
+            const worngMove = snakeBody.some((item,index)=>
+                index > 0 && item.left === snakeHead.left && 
+                item.top === snakeHead.top
+             )
+
+            if(worngMove){
+                gameOver()
+            }
+
+            for(let i = 0; snakeBody.length > i; i++){
+                let snakeDiv = document.createElement("div");
+                snakeDiv.style.left = snakeBody[i].left + 'px';
+                snakeDiv.style.top = snakeBody[i].top + 'px';
+                snakeDiv.classList.add('snake-body');
+                playField.appendChild(snakeDiv)
+            }
+            
+
+
+            const {left, top} = document.getElementById("snake-food-div").getBoundingClientRect();
+            if(left === snakeHead.left && top === snakeHead.top){
+                snakeBody.push({left: 0, top: 0})
+                snakeFood();
+                console.log(...snakeBody,'== snake eat food ==');
+            }
+        },100)
+        
+    }
+
+
+    function snakeFood(){
+        document.getElementById("snake-food-div")?.remove();
+
+        const playField = document.getElementById("play-field");
+        const { height, width } = playField.getBoundingClientRect();
+
+        const snakeFood = document.createElement('div');
+        snakeFood.setAttribute("id","snake-food-div")
+        
+
+        const randomTop = Math.round((Math.random() * height)/10) * 10;
+        const randomLeft = Math.round((Math.random() * width)/10) * 10;
+        snakeFood.style.top = randomTop + 'px';
+        snakeFood.style.left = randomLeft + 'px';
+
+        playField.appendChild(snakeFood)
+
+        console.log(height, width, '==random==',randomTop,randomLeft);
+        
+    }
+</script>
