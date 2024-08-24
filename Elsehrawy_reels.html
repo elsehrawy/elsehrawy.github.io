@@ -49,14 +49,15 @@
     var videosIds=[]
 
     function getVideos(){
-        const API_link = 'https://www.googleapis.com/drive/v3/files';
-       const key = 'AIzaSyCrp59d_EfixPZM01VcCDRN2GFljZDyg7U';
-       const query = '"1upfGqUPu40vtrc7y_b19MIQwXkzyuorG" in parents'
-       const link = API_link + '?key=' + key + '&q=' + query;
+        const API_link = 'https://api.github.com/';
+       const owner = 'elsehrawy';
+       const repo = 'elsehrawy.github.io'
+       const videosPath = 'Elsehrawy_Reels'
+       const link = API_link + 'repos/' + owner + '/' + repo + '/contents/' + videosPath;
        fetch(link,{ method:"get"})
        .then(res=>{ return res.json() })
        .then(JsonData=>{
-        videosIds = JsonData.files.map(file=>file.id)
+        videosIds = JsonData.map(file=>file.name)
         createAllVideos();
     })
     }
@@ -68,12 +69,12 @@
             createVideo(videoId);
         })
     }
-
     function createVideo(videoId){
         let video = document.createElement('video');
-        video.src = 'https://drive.google.com/uc?export=download&id=' + videoId;
+         video.src = 'https://elsehrawy.github.io/Elsehrawy_Reels/' + videoId;
         video.loop = true;
         video.controls = true;
+        video.allow = 'autoplay';
         
         let videoContainer = document.createElement('div');
         videoContainer.classList.add('video-container');
@@ -88,7 +89,7 @@
 
         if(playingVideos && playingVideos.length > 0){
             playingVideos.forEach((elm)=>{
-                targetVideo.setAttribute('isPlaying','false')
+                elm.setAttribute('isPlaying','false');
                 elm.pause();
             })
         }
