@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XO Game</title>
+    <style>
+        html,body{
+            margin: 0;
+            height: 100%;
+        }
+        .container{
+            height: 100%;
+            background-color: #0d0d0d;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            font-family: "Roboto", sans-serif;
+        }
+        .play-field{
+            margin: auto;
+            width: 450px;
+        }
+        .xo_square{
+            width: 150px;
+            height: 150px;
+            border: 1px solid #fff;
+            float: left;
+            box-sizing: border-box;
+        }
+        .XO_div{
+            font-size: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+        }
+        .O_Text{
+            background-color: #ff2b2b;
+        }
+        .X_Text{
+            background-color: #004cff;
+        }
+        #turnText{
+            text-align: center;
+        }
+
+        #game_result_card{
+         background-color: #fff;
+         border: 1px solid #fff;
+         border-radius: 5px;
+         position: absolute;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         top: 0;
+         margin: auto; 
+         width: 400px;
+         height: 200px;  
+         display: none;
+         flex-direction: column;
+        }
+        #start_game_button{
+            background-color: blue;
+            color: #fff;
+            border-radius: 5px;
+            border: 0;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #game_result{
+            flex:1;
+            color:black;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="turnText">Player X Turn</h2>
+        <div class="play-field">
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+            <div class="xo_square" onclick="play(this)"></div>
+        </div>
+
+        <div id="game_result_card">
+            <h1 id="game_result"></h1>
+            <button id="start_game_button" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    let userTurn = "X"
+    function play(element){
+        if(element.hasChildNodes()) return;
+        let XO_div = document.createElement("div");
+        XO_div.textContent = userTurn;
+        XO_div.classList.add("XO_div",userTurn + "_Text")
+        element.appendChild(XO_div)
+        userTurn = userTurn === "X" ? "O" : "X";
+        document.getElementById("turnText").textContent = "Player " + userTurn + " Turn"
+        checkScore()
+    }
+
+
+    function checkScore() {
+        let PlayerX = [];
+        let PlayerO = [];
+        let winner = null;
+        possibleSolutions = [
+            [0,1,2], // across
+            [3,4,5],
+            [6,7,8],
+            [0,3,6], // down
+            [1,4,7],
+            [2,5,8],
+            [0,4,8], // diagonals
+            [2,4,6] 
+        ]
+        document.querySelectorAll('.xo_square').forEach((square,index)=>{
+            if(square.textContent === "X"){ PlayerX.push(index) }
+            if(square.textContent === "O"){ PlayerO.push(index) }
+        });
+        possibleSolutions.forEach((solution)=>{
+            if(solution.every((solutionArray)=>PlayerX.includes(solutionArray))){
+                console.log('==PlayerX win==');
+                winner = "X"
+            }
+            if(solution.every((solutionArray)=>PlayerO.includes(solutionArray))){
+                console.log('==PlayerO win==')
+                winner = "O"
+            }
+        })
+        
+        if(winner){
+            document.getElementById("game_result").textContent = "Player " +  winner + " Won";
+            document.getElementById("game_result_card").style.display = 'flex'
+        }else if(document.querySelectorAll('.XO_div').length === 9){
+            document.getElementById("game_result").textContent = "No Winners";
+            document.getElementById("game_result_card").style.display = 'flex'
+        }
+    }
+
+    function startGame(){
+        document.querySelectorAll('.XO_div').forEach((xo)=>xo.remove())
+        document.getElementById("game_result_card").style.display = 'none'
+    }
+</script>
