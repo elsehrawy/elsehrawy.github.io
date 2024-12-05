@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elsehrawy Webcam</title>
+    <style>
+        html, body{
+            margin: 0;
+            height: 100%;
+        }
+        body{
+            text-align: center;
+            background: #212121;
+        }
+        video{
+            height: 90%;
+        }
+        button{
+            padding: 5px 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 0;
+            background: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .recording-btns{
+            background: #d42828;
+            color: #fff;
+            height: 30px;
+            width: 30px;
+            border: 2px solid #fff;
+            padding: 10px;
+        }
+        .rounded-btn{
+            border-radius: 100%;
+        }
+        .blue-btn{
+            background-color: #1e4f9e;
+            color: #fff;
+        }
+        .hide{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <video id="Video_Player" autoplay controls></video>
+    <div>
+        <button id="Start_Recording" class="recording-btns rounded-btn" onclick="startRecording()"></button>
+        <button id="Stop_Recording" class="recording-btns hide" onclick="stoptRecording()"></button>
+        <button onclick="BackToLiveStream()">Live Stream</button>
+        <button id="download" class="blue-btn hide" onclick="download()">Download</button>
+        <button onclick="flipCamera()">Flip Camera</button>
+    </div>
+</body>
+</html>
+
+<script>
+    let mediaRecorder = null
+    let stream = null
+    const VideoPlayer = document.getElementById("Video_Player")
+    let front = false;
+
+    function initStream(){
+        navigator.mediaDevices.getUserMedia({audio:true, 
+            video: { facingMode: front? 'user' : 'environment' } }).then(function(streamObject) {
+            VideoPlayer.srcObject = streamObject
+            stream = streamObject;
+            initRecorder();
+        });
+    }
+    
+    initStream();
+
+    function flipCamera(){
+        front = !front;
+        initStream();
+    }
+
+    function initRecorder(){
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.addEventListener("dataavailable",(event)=>{
+            console.log('==event==',URL.createObjectURL(event.data));
+            VideoPlayer.src = URL.createObjectURL(event.data);
+            VideoPlayer.srcObject = null;
+            document.getElementById("download").classList.remove('hide')
+        })
+    }
+
+    function BackToLiveStream(){
+        VideoPlayer.srcObject = stream;
+    }
+
+    function startRecording() {
+        console.log("==startRecording===");
+        mediaRecorder.start();
+        document.getElementById("Stop_Recording").classList.remove('hide')
+        document.getElementById("Start_Recording").classList.add('hide')
+    }
+
+    function stoptRecording() {
+        console.log("==stoptRecording===");
+        mediaRecorder.stop();
+        document.getElementById("Stop_Recording").classList.add('hide')
+        document.getElementById("Start_Recording").classList.remove('hide')
+    }
+
+    function download() {
+        const link = document.createElement('a');
+        link.href = VideoPlayer.src;
+        link.download = 'MyVideo.mp4';
+        link.click();
+    }
+</script>
