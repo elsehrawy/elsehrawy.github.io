@@ -49,7 +49,7 @@
     <video id="Video_Player" autoplay controls playsinline></video>
     <div>
         <button id="Start_Recording" class="recording-btns rounded-btn" onclick="startRecording()"></button>
-        <button id="Stop_Recording" class="recording-btns hide" onclick="stoptRecording()"></button>
+        <button id="Stop_Recording" class="recording-btns hide" onclick="stopRecording()"></button>
         <button onclick="BackToLiveStream()">Live Stream</button>
         <button id="download" class="blue-btn hide" onclick="download()">Download</button>
         <button onclick="flipCamera()">Flip Camera</button>
@@ -96,11 +96,12 @@
     function startRecording() {
         console.log("==startRecording===");
         mediaRecorder.start();
+        setTimeout( stopRecording ,3 * 60 * 1000)
         document.getElementById("Stop_Recording").classList.remove('hide')
         document.getElementById("Start_Recording").classList.add('hide')
     }
 
-    function stoptRecording() {
+    function stopRecording() {
         console.log("==stoptRecording===");
         mediaRecorder.stop();
         document.getElementById("Stop_Recording").classList.add('hide')
